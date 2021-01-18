@@ -21,6 +21,14 @@ const webpackConfig = {
       template: path.resolve(__dirname, "src", "index.html"),
     }),
   ],
+  module: {
+    rules: [
+      {
+        test: /\.(scss|css)$/,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
+    ],
+  },
   devtool: isDev ? "source-map" : false,
   devServer: {
     port: 3000,
