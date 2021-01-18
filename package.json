@@ -1,0 +1,17 @@
+{
+  "name": "mini-framework",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:skhv-a/mini-framework.git",
+  "author": "Alex <skhv-a@yandex.ru>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "webpack": "^5.15.0",
+    "webpack-cli": "^4.3.1"
+  }
+}
