@@ -1,3 +1,3 @@
 import "./script";
 
-console.log("indexd");
+console.log("index");
