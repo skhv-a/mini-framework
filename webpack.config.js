@@ -9,7 +9,7 @@ const filename = (ext) =>
   isDev ? `bundle.${ext}` : `bundle.[contenthash].${ext}`;
 
 const webpackConfig = {
-  entry: "./src/index.js",
+  entry: "./src/index.ts",
   mode: "development",
   output: {
     filename: filename("js"),
@@ -27,7 +27,15 @@ const webpackConfig = {
         test: /\.(scss|css)$/,
         use: ["style-loader", "css-loader", "sass-loader"],
       },
+      {
+        test: /\.(ts)$/,
+        use: ["babel-loader", "eslint-loader"],
+        exclude: /node_modules/,
+      },
     ],
+  },
+  resolve: {
+    extensions: [".ts", ".js"],
   },
   devtool: isDev ? "source-map" : false,
   devServer: {
