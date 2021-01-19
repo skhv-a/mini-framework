@@ -1,17 +1,17 @@
-import {
-  ComponentClass,
-  ComponentOptions,
-  IComponent,
-} from "../models/Component";
+import { ComponentOptions, IComponent } from "../models/Component";
 
-export class Component implements IComponent {
+export class Component<props> implements IComponent {
   name: string;
-  template: string;
-  components: ComponentClass[];
+  props: props;
+  children?: string;
 
-  constructor({ name, template, components = [] }: ComponentOptions) {
+  constructor({ name, props = {}, children: ChildrenComponent }: ComponentOptions) {
     this.name = name;
-    this.template = template;
-    this.components = components;
+    this.props = props;
+    this.children = ChildrenComponent && new ChildrenComponent().render();
+  }
+
+  render(): string {
+    return "";
   }
 }

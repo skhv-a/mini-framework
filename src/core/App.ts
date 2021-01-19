@@ -18,7 +18,7 @@ export class App implements IApp {
       const component = new Component();
 
       const $child = document.createElement("div");
-      $child.innerHTML = component.template;
+      $child.innerHTML = component.render();
 
       this.$root.append($child);
     });

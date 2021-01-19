@@ -1,13 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface IComponent {
   name: string;
-  template: string;
-  components: ComponentClass[];
+  children?: string;
+  props: any;
+  render(): string;
 }
 
 export type ComponentClass = {
   new (): IComponent;
 };
 
-export type ComponentOptions = Pick<IComponent, "name" | "template"> & {
-  components?: ComponentClass[];
+export type ComponentOptions = {
+  name: string;
+  children?: ComponentClass;
+  props?: any;
 };
