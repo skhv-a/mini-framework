@@ -32,7 +32,7 @@ const webpackConfig = {
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
-        test: /\.(ts)$/,
+        test: /\.ts$/,
         use: ["babel-loader", "eslint-loader"],
         exclude: /node_modules/,
       },
