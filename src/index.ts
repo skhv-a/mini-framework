@@ -1,5 +1,6 @@
 import { App } from "./core/App";
 import { Component } from "./core/Component";
+import { templateComponent } from "./core/utils/templateComponent";
 
 type TitleProps = {
   name: string;
@@ -10,15 +11,19 @@ class Title extends Component<TitleProps> {
     super({
       name: "Title",
       props,
+      events: ["click"],
     });
+  }
+
+  click(e: MouseEvent) {
+    e.stopPropagation();
+    console.log("click from Title");
   }
 
   render() {
     return /* html */ `
-      <div>
-        <h1>Title</h1>
-        ${this.props.name}
-      </div>
+      <h1>Title</h1>
+      ${this.props.name}
   `;
   }
 }
@@ -32,14 +37,19 @@ class Header extends Component<HeaderProps> {
     super({
       name: "Header",
       props,
-      children: Title.bind(null, { name: "alex" }),
+      events: ["click"],
+      components: { Title },
     });
+  }
+
+  click(e: MouseEvent) {
+    console.log(e);
   }
 
   render() {
     return /* html */ `
-      <div class='header'>
-        Header ${this.children} 
+      <div class='header' data-about="Elephants">
+        Header ${templateComponent("Title", { name: "alex" })}
         <button>${this.props.btnText}</button>
       </div>`;
   }
