@@ -52,34 +52,47 @@ class Title extends Component<TitleProps> {
   }
 }
 
-type HeaderProps = {
-  btnText: string;
-};
-
-class Header extends Component<HeaderProps> {
-  constructor(props: HeaderProps) {
+type BtnProps = { onClick: () => void };
+class Button extends Component<BtnProps> {
+  constructor(props: BtnProps) {
     super({
-      name: "Header",
+      name: "Button",
       props,
-      events: ["click"],
-      components: { Title },
     });
-  }
-
-  click(e: MouseEvent) {
-    console.log(e);
   }
 
   render() {
     return /* html */ `
-      <div class='header' data-about="Elephants">
-        Header ${templateComponent("Title", { name: "alex" })}
-        <button>${this.props.btnText}</button>
-      </div>`;
+        <button style='margin-right:15px;'>Increment</button>
+    `;
   }
 }
 
+class Header extends Component<undefined> {
+  constructor() {
+    super({
+      name: "Button",
+      components: { Button },
+    });
+    this.state = {
+      counter: 0,
+    };
+  }
+
+  increment = () => {
+    this.setState();
+  };
+
+  render() {
+    return /* html */ `
+        <div style="height:100vh;display:flex;justify-content:center;align-items:center">
+          ${templateComponent("Button", { onClick: this.increment })}
+          ${this.state.counter}
+        </div>
+    `;
+  }
+}
 const app = new App("#root", {
-  components: [Header.bind(null, { btnText: "buttom" })],
+  components: [Header],
 });
 app.mount();

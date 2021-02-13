@@ -124,5 +124,9 @@ export abstract class Component<props>
     return;
   }
 
+  setState() {
+    console.log(this.state);
+  }
+
   abstract render(): string;
 }
