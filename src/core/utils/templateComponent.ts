@@ -1,12 +1,19 @@
-import { ComponentOptions } from "../../models/Component";
+type Props = {
+  [key: string]: any;
+};
+
+let props: Props = {};
+
+export const getTemplateComponentProps = (): Props => props;
 
 export const templateComponent = (
   name: string,
-  options?: ComponentOptions
+  componentProps?: Props
 ): string => {
   const $templateComponent = document.createElement("div");
   $templateComponent.setAttribute("data-component", name);
-  $templateComponent.setAttribute("data-props", JSON.stringify(options || {}));
+
+  props = componentProps || {};
 
   return $templateComponent.outerHTML;
 };

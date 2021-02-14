@@ -16,7 +16,7 @@ export class App implements IApp {
   mount(): void {
     this.options.components.forEach((Component) => {
       const component = new Component();
-      component.init();
+      component.init(this.$root);
 
       this.$root.append(component.getRoot());
     });
