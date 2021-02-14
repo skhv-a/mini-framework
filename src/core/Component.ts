@@ -108,7 +108,7 @@ export abstract class Component<props>
 
     this.$root = this.getRootFromTemplate(html);
     this.$root.innerHTML = this.getInnerHtmlOfRootTemplate(html);
-    if ($prevRoot) {
+    if ($prevRoot && !this.$root.isEqualNode($prevRoot)) {
       this.$parent.replaceChild(this.$root, $prevRoot);
     }
 
