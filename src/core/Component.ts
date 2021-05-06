@@ -4,7 +4,7 @@ import {
   ComponentClass,
 } from "../models/Component";
 import { DomListeners } from "./DomListeners";
-import { removeExtraSpacesFromHtml } from "./utils/normalizeHtml";
+import { normalizeTemplate } from "./utils/normalizeTemplate";
 
 export abstract class Component<props>
   extends DomListeners
@@ -91,7 +91,9 @@ export abstract class Component<props>
         const [name = ""] = unparsedProp.match(/\w+(?=\=)/) ?? [];
         const [value = ""] = unparsedProp.match(/(?<=\=).+/) ?? [];
 
-        let parsedValue = eval(value);
+        console.log(eval("this"));
+
+        let parsedValue = "eval(value)";
 
         if (typeof parsedValue === "function") {
           parsedValue = parsedValue.bind(this);
@@ -110,7 +112,7 @@ export abstract class Component<props>
 
   init(): Component<props> {
     const html = this.render();
-    const htmlWithoutExtraSpaces = removeExtraSpacesFromHtml(html);
+    const htmlWithoutExtraSpaces = normalizeTemplate(html);
 
     this.template = htmlWithoutExtraSpaces;
     this.$root = this.getRootFromTemplate();
