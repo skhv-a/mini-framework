@@ -1,6 +1,5 @@
 import { App } from "./core/App";
 import { Component } from "./core/Component";
-import { templateComponent } from "./core/utils/templateComponent";
 
 class TitleDescription extends Component<null> {
   constructor() {
@@ -17,7 +16,9 @@ class TitleDescription extends Component<null> {
 
   render() {
     return /* html */ `
-      <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</span>
+      <span>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+      </span>
     `;
   }
 }
@@ -43,10 +44,10 @@ class Title extends Component<TitleProps> {
 
   render() {
     return /* html */ `
-      <div> 
+      <div class='Title'> 
         <h1>Title</h1>
-        ${this.props.name}
-        ${templateComponent("TitleDescription")}
+        ${this.props.name} 
+        <TitleDescription  />
       </div>
   `;
   }
@@ -77,10 +78,10 @@ class Header extends Component<undefined> {
   constructor() {
     super({
       name: "Header",
-      components: { Button },
+      components: { Button, Title },
     });
     this.state = {
-      counter: 0,
+      counter: 1,
     };
   }
 
@@ -90,11 +91,27 @@ class Header extends Component<undefined> {
 
   render() {
     return /* html */ `
-        <div style="height:100vh;display:flex;justify-content:center;align-items:center">
-          ${templateComponent("Button", {
-            onClick: this.increment,
-          })}
-          ${this.state.counter}
+        <div class="Header" style="height:100vh;display:flex;justify-content:center;align-items:center">
+        <Button 
+          :onClick=this.increment 
+          :name="alex"
+          :age=18
+          :a='sfdafs fsda'
+          :arr=["foo", "bar"]
+          :sayHi=() => {
+            console.log('Look at "this" magic ', this);
+          }
+        />
+
+          ${this.state.counter} 
+          ${
+            this.state.counter > 1
+              ? "Title disapeared"
+              : /* html */ `
+                  <Title :name="alex"/>
+                  click the button to toggle title
+                    `
+          }
         </div>
     `;
   }

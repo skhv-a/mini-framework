@@ -4,12 +4,13 @@ import {
   ComponentClass,
 } from "../models/Component";
 import { DomListeners } from "./DomListeners";
-import { getTemplateComponentProps } from "./utils/templateComponent";
+import { removeExtraSpacesFromHtml } from "./utils/normalizeHtml";
 
 export abstract class Component<props>
   extends DomListeners
   implements IComponent {
   name: string;
+  template: string;
   props: props;
   components: { [name: string]: ComponentClass };
   $root: Element | null;
@@ -30,98 +31,105 @@ export abstract class Component<props>
     this.$parent = null;
   }
 
-  private getRootFromTemplate(template: string): Element {
-    const openingTag = template.indexOf("<");
-    const closingTag = template.indexOf(">");
-    const tagWithAttrs = template.slice(openingTag + 1, closingTag);
+  private getRootFromTemplate(): Element {
+    const ROOT_TAG_REG_EXP = /(?<=<)\w+/i;
+    const ROOT_ATTRS_REG_EXP = /(?<=\<\w+\s).*?(?=>)/g;
 
-    const [tag, ...attrs] = tagWithAttrs.split(" ");
+    const [rootTag] = this.template.match(ROOT_TAG_REG_EXP) ?? [""];
 
-    const $root = document.createElement(tag);
+    if (!rootTag) {
+      throw new Error("Cannot get root tag from template");
+    }
 
-    attrs.forEach((attr) => {
-      const [attrName, value] = attr.split("=");
-      const valueWithoutQuotes = value.slice(1, -1);
+    const $root = document.createElement(rootTag);
 
-      if ($root) {
-        $root.setAttribute(attrName, valueWithoutQuotes);
-      }
+    const [unsplitedAttrs] = this.template.match(ROOT_ATTRS_REG_EXP) ?? [""];
+
+    const attrs = unsplitedAttrs.split(" ");
+
+    attrs.forEach((attrWithValue) => {
+      if (!attrWithValue) return;
+
+      const [attr, value] = attrWithValue.split("=");
+      $root.setAttribute(attr, value);
     });
 
     return $root;
   }
 
-  private getInnerHtmlOfRootTemplate(template: string): string {
-    const innerHTMLStart = template.indexOf(">");
-    const innerHTMLEnd = template.lastIndexOf("<");
+  private getInnerHtmlOfRootTemplate(): string {
+    const INNER_HTML_REG_EXP = /(?<=>).*(?=<\/\w+>)/g;
+    const [innterHtml] = this.template.match(INNER_HTML_REG_EXP) ?? [""];
 
-    return template.slice(innerHTMLStart + 1, innerHTMLEnd);
+    return innterHtml;
   }
 
+  // parseComponentsFromTemplate
   private initComponents(): void {
-    if (!this.$root) {
-      throw new Error("$root does not exist");
-    }
+    // parseComponentsNames
 
-    if (!Object.keys(this.components).length) {
-      return;
-    }
+    const COMPONENT_NAMES_REG_EXP = /(?<=\<)[A-Z]\w+/g;
 
-    this.$root
-      .querySelectorAll("[data-component]")
-      .forEach((templateComponent) => {
-        const componentName =
-          templateComponent.getAttribute("data-component") ?? "";
+    const componentsNames = this.template.match(COMPONENT_NAMES_REG_EXP) ?? [];
 
-        const ComponentConstructor = this.components[componentName];
-        if (!ComponentConstructor) {
-          throw new Error(
-            `${componentName} constructor was not found in 'components' object`
-          );
+    const componentsWithProps = componentsNames.reduce((acc, componentName) => {
+      const COMPONENT_PROPS_REG_EXP = new RegExp(
+        `(?<=\\<${componentName}\\s?).*?(?=\\/>)`,
+        "g"
+      );
+
+      const [props = ""] = this.template.match(COMPONENT_PROPS_REG_EXP) ?? [];
+
+      const normalizedProps = props
+        .replace(/\s?:/g, ":")
+        .split(":")
+        .filter((p) => !!p);
+
+      //parseProps
+
+      const parsedProps = normalizedProps.reduce((acc, unparsedProp) => {
+        const [name = ""] = unparsedProp.match(/\w+(?=\=)/) ?? [];
+        const [value = ""] = unparsedProp.match(/(?<=\=).+/) ?? [];
+
+        let parsedValue = eval(value);
+
+        if (typeof parsedValue === "function") {
+          parsedValue = parsedValue.bind(this);
         }
 
-        const component = new ComponentConstructor(
-          getTemplateComponentProps()
-        ).init(this.$root);
+        acc[name] = value;
 
-        const templateComponentParent = templateComponent.parentElement;
+        return acc;
+      }, {} as { [key: string]: any });
 
-        if (templateComponentParent && component.$root) {
-          templateComponentParent.replaceChild(
-            component.$root,
-            templateComponent
-          );
-        } else {
-          console.error(
-            `Something went wrong :(
-            templateComponentParent: ${templateComponentParent}; 
-            $root: ${component.$root};`
-          );
-        }
-      });
+      acc[componentName] = parsedProps;
+
+      return acc;
+    }, {} as { [key: string]: any });
   }
 
-  init($parent: Element): Component<props> {
-    this.$parent = $parent;
-    const $prevRoot = $parent.firstChild;
+  init(): Component<props> {
     const html = this.render();
+    const htmlWithoutExtraSpaces = removeExtraSpacesFromHtml(html);
 
-    this.$root = this.getRootFromTemplate(html);
-    this.$root.innerHTML = this.getInnerHtmlOfRootTemplate(html);
-    if ($prevRoot && !this.$root.isEqualNode($prevRoot)) {
-      this.$parent.replaceChild(this.$root, $prevRoot);
-    }
+    this.template = htmlWithoutExtraSpaces;
+    this.$root = this.getRootFromTemplate();
 
-    this.componentDidMount();
-    super.initDOMListeners();
+    this.$root.innerHTML = this.getInnerHtmlOfRootTemplate();
     this.initComponents();
+
+    super.initDOMListeners();
+
+    // this.initComponents();
+    // this.componentDidMount();
 
     return this;
   }
 
   getRoot(): Element {
     if (!this.$root) {
-      throw new Error('Run "init" method before "getRoot" method');
+      // throw new Error('Run "init" method before "getRoot" method');
+      return document.createElement("div");
     }
 
     return this.$root;
@@ -133,7 +141,7 @@ export abstract class Component<props>
 
   setState(newState) {
     this.state = { ...this.state, ...newState };
-    this.init(this.$parent);
+    // this.init();
   }
 
   abstract render(): string;
