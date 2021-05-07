@@ -1,5 +1,5 @@
-import { App } from "./core/App";
-import { Component } from "./core/Component";
+import { App } from "@core/App";
+import { Component } from "@core/Component";
 
 class TitleDescription extends Component<null> {
   constructor() {
