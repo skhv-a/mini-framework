@@ -2,13 +2,14 @@ import {
   ComponentOptions,
   IComponent,
   ComponentClass,
-} from "../models/Component";
+} from "@src/models/Component";
 import { DomListeners } from "./DomListeners";
 import { normalizeTemplate } from "./utils/normalizeTemplate";
 
 export abstract class Component<props>
   extends DomListeners
-  implements IComponent {
+  implements IComponent
+{
   name: string;
   template: string;
   props: props;
@@ -91,9 +92,7 @@ export abstract class Component<props>
         const [name = ""] = unparsedProp.match(/\w+(?=\=)/) ?? [];
         const [value = ""] = unparsedProp.match(/(?<=\=).+/) ?? [];
 
-        console.log(eval("this"));
-
-        let parsedValue = "eval(value)";
+        let parsedValue = eval(value);
 
         if (typeof parsedValue === "function") {
           parsedValue = parsedValue.bind(this);

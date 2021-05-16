@@ -41,7 +41,7 @@ const webpackConfig = {
   },
   resolve: {
     extensions: [".ts", ".js"],
-    plugins: [new TsconfigPathsPlugin()]
+    plugins: [new TsconfigPathsPlugin()],
   },
 
   devtool: isDev ? "source-map" : false,

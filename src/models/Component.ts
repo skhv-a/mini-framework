@@ -1,5 +1,5 @@
-import { Component } from "../core/Component";
-import { DomListeners } from "../core/DomListeners";
+import { Component } from "@core/Component";
+import { DomListeners } from "@core/DomListeners";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface IComponent extends DomListeners {
@@ -21,4 +21,8 @@ export type ComponentOptions = {
   components?: { [name: string]: ComponentClass };
   props?: any;
   events?: string[];
+};
+
+export type Props = {
+  [propName: string]: any;
 };
