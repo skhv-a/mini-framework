@@ -2,6 +2,7 @@ import {
   normalizeProps,
   parseComponentPropsFromTemplate,
   parseComponentsNames,
+  parsePropName,
 } from "@core/utils/componentsParser";
 import { PROPS_PARSER_TEST_COMPONENT } from "@mocks/components";
 import { NORMALIZED_TEMPLATE } from "@mocks/templates";
@@ -23,6 +24,10 @@ const NORMALIZED_RAW_PROPS: string[] = [
   "onClick=this.clickHandler",
 ];
 
+const UPARSED_PROP = 'string="hello!"';
+const UPARSED_PROP_NAME = "string";
+const UPARSED_PROP_VALUE = '"hello!"';
+
 describe("Components Parser", () => {
   it("parseComponentsNames", () => {
     expect(parseComponentsNames(NORMALIZED_TEMPLATE)).toEqual([
@@ -42,5 +47,9 @@ describe("Components Parser", () => {
 
   it("normalizeProps", () => {
     expect(normalizeProps(RAW_PROPS)).toEqual(NORMALIZED_RAW_PROPS);
+  });
+
+  it("parsePropName", () => {
+    expect(parsePropName(UPARSED_PROP)).toBe(UPARSED_PROP_NAME);
   });
 });

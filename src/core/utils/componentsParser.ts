@@ -9,16 +9,18 @@ export const parseChildrenComponentsFromComponent = <T>(
   const { template } = component;
 
   const componentsNames = parseComponentsNames(template);
+
   const componentsWithProps = componentsNames.reduce((acc, componentName) => {
-    const props = parseComponentPropsFromTemplate(componentName, template);
-    const normalizedProps = normalizeProps(props);
+    const rawProps = parseComponentPropsFromTemplate(componentName, template);
+    const normalizedRawProps = normalizeProps(rawProps);
 
     //parseProps
 
-    const parsedProps = normalizedProps.reduce((acc, unparsedProp) => {
-      const [name = ""] = unparsedProp.match(/\w+(?=\=)/) ?? [];
-      const [value = ""] = unparsedProp.match(/(?<=\=).+/) ?? [];
+    const parsedProps = normalizedRawProps.reduce((acc, rawProp) => {
+      const name = parsePropName(rawProp);
+      const [value = ""] = rawProp.match(/(?<=\=).+/) ?? [];
 
+      //parsePropValue
       let parsedValue = eval(value);
 
       if (typeof parsedValue === "function") {
@@ -58,11 +60,15 @@ export const parseComponentPropsFromTemplate = (
   return props;
 };
 
-export const normalizeProps = (rawProps: string): string[] => {
-  const normalizedProps = rawProps
+export const normalizeProps = (rawProps: string): string[] =>
+  rawProps
     .split(/\s:/)
     .filter((p) => !!p)
     .map((p) => p.trim());
 
-  return normalizedProps;
+export const parsePropName = (rawProp: string): string => {
+  const PROP_NAME_REG_EXP = /\w+(?=\=)/;
+  const [name = ""] = rawProp.match(PROP_NAME_REG_EXP) ?? [];
+
+  return name;
 };
