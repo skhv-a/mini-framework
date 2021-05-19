@@ -3,6 +3,7 @@ import {
   parseComponentPropsFromTemplate,
   parseComponentsNames,
   parsePropName,
+  parsePropRawValue,
 } from "@core/utils/componentsParser";
 import { PROPS_PARSER_TEST_COMPONENT } from "@mocks/components";
 import { NORMALIZED_TEMPLATE } from "@mocks/templates";
@@ -24,9 +25,9 @@ const NORMALIZED_RAW_PROPS: string[] = [
   "onClick=this.clickHandler",
 ];
 
-const UPARSED_PROP = 'string="hello!"';
-const UPARSED_PROP_NAME = "string";
-const UPARSED_PROP_VALUE = '"hello!"';
+const RAW_PROP = 'string="hello!"';
+const RAW_PROP_NAME = "string";
+const RAW_PROP_VALUE = '"hello!"';
 
 describe("Components Parser", () => {
   it("parseComponentsNames", () => {
@@ -50,6 +51,10 @@ describe("Components Parser", () => {
   });
 
   it("parsePropName", () => {
-    expect(parsePropName(UPARSED_PROP)).toBe(UPARSED_PROP_NAME);
+    expect(parsePropName(RAW_PROP)).toBe(RAW_PROP_NAME);
+  });
+
+  it("parsePropRawValue", () => {
+    expect(parsePropRawValue(RAW_PROP)).toBe(RAW_PROP_VALUE);
   });
 });

@@ -72,3 +72,10 @@ export const parsePropName = (rawProp: string): string => {
 
   return name;
 };
+
+export const parsePropRawValue = (rawProp: string): string => {
+  const PROP_RAW_VALUE_REG_EXP = /(?<=\=).+/;
+  const [rawValue = ""] = rawProp.match(PROP_RAW_VALUE_REG_EXP) ?? [];
+
+  return rawValue;
+};
