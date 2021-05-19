@@ -1,11 +1,46 @@
-import { parseComponentsNames } from "@core/utils/componentsParser";
+import {
+  normalizeProps,
+  parseComponentPropsFromTemplate,
+  parseComponentsNames,
+} from "@core/utils/componentsParser";
+import { PROPS_PARSER_TEST_COMPONENT } from "@mocks/components";
 import { NORMALIZED_TEMPLATE } from "@mocks/templates";
 
-describe("Component Parser", () => {
+const TEST_COMPONENT = new PROPS_PARSER_TEST_COMPONENT();
+
+const RAW_PROPS =
+  ' :string="hello!" :number=28 :boolean=true :null=null :undefined=undefined :object={name: "Alex"} :array=["foo", "bar"] :function=() => {alert("hi!");} :onClick=this.clickHandler ';
+
+const NORMALIZED_RAW_PROPS: string[] = [
+  'string="hello!"',
+  "number=28",
+  "boolean=true",
+  "null=null",
+  "undefined=undefined",
+  'object={name: "Alex"}',
+  'array=["foo", "bar"]',
+  'function=() => {alert("hi!");}',
+  "onClick=this.clickHandler",
+];
+
+describe("Components Parser", () => {
   it("parseComponentsNames", () => {
     expect(parseComponentsNames(NORMALIZED_TEMPLATE)).toEqual([
       "Button",
       "ComponentWithALotOfProps",
     ]);
+  });
+
+  it("parseComponentPropsFromTemplate", () => {
+    expect(
+      parseComponentPropsFromTemplate(
+        "ComponentForTest",
+        TEST_COMPONENT.template
+      )
+    ).toBe(RAW_PROPS);
+  });
+
+  it("normalizeProps", () => {
+    expect(normalizeProps(RAW_PROPS)).toEqual(NORMALIZED_RAW_PROPS);
   });
 });

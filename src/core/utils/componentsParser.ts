@@ -1,13 +1,14 @@
 import { Props } from "@src/models/Component";
+import { Component } from "@core/Component";
 
 type ParsedComponents = { [componentName: string]: Props };
 
-// parseComponentsFromTemplate
-export const parseComponentsFromTemplate = (
-  template: string
+export const parseChildrenComponentsFromComponent = <T>(
+  component: Component<T>
 ): ParsedComponents => {
-  const componentsNames = parseComponentsNames(template);
+  const { template } = component;
 
+  const componentsNames = parseComponentsNames(template);
   const componentsWithProps = componentsNames.reduce((acc, componentName) => {
     const props = parseComponentPropsFromTemplate(componentName, template);
     const normalizedProps = normalizeProps(props);
@@ -21,7 +22,7 @@ export const parseComponentsFromTemplate = (
       let parsedValue = eval(value);
 
       if (typeof parsedValue === "function") {
-        parsedValue = parsedValue.bind(this);
+        parsedValue = parsedValue.bind(component);
       }
 
       acc[name] = value;
@@ -59,9 +60,9 @@ export const parseComponentPropsFromTemplate = (
 
 export const normalizeProps = (rawProps: string): string[] => {
   const normalizedProps = rawProps
-    .replace(/\s?:/g, ":")
-    .split(":")
-    .filter((p) => !!p);
+    .split(/\s:/)
+    .filter((p) => !!p)
+    .map((p) => p.trim());
 
   return normalizedProps;
 };
