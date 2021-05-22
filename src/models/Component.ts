@@ -23,6 +23,19 @@ export type ComponentOptions = {
   events?: string[];
 };
 
+export type PropValue =
+  | string
+  | number
+  | null
+  | boolean
+  | undefined
+  | Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  | Function
+  | PropValue[];
+
 export type Props = {
-  [propName: string]: any;
+  [propName: string]: PropValue;
 };
+
+export type ParsedComponent = { name: string; props: Props };

@@ -1,43 +1,33 @@
-import { Props } from "@src/models/Component";
+import { ParsedComponent, Props, PropValue } from "@src/models/Component";
 import { Component } from "@core/Component";
-
-type ParsedComponents = { [componentName: string]: Props };
 
 export const parseChildrenComponentsFromComponent = <T>(
   component: Component<T>
-): ParsedComponents => {
+): ParsedComponent[] => {
   const { template } = component;
 
   const componentsNames = parseComponentsNames(template);
 
-  const componentsWithProps = componentsNames.reduce((acc, componentName) => {
-    const rawProps = parseComponentPropsFromTemplate(componentName, template);
-    const normalizedRawProps = normalizeProps(rawProps);
+  const parsedComponents: ParsedComponent[] = componentsNames.map(
+    (componentName) => {
+      const rawProps = parseComponentPropsFromTemplate(componentName, template);
+      const normalizedRawProps = normalizeProps(rawProps);
 
-    //parseProps
+      const parsedProps = normalizedRawProps.reduce((props, rawProp) => {
+        const name = parsePropName(rawProp);
+        const rawValue = parsePropRawValue(rawProp);
+        const parsedValue = parsePropValue(rawValue, component);
 
-    const parsedProps = normalizedRawProps.reduce((acc, rawProp) => {
-      const name = parsePropName(rawProp);
-      const [value = ""] = rawProp.match(/(?<=\=).+/) ?? [];
+        props[name] = parsedValue;
 
-      //parsePropValue
-      let parsedValue = eval(value);
+        return props;
+      }, {} as Props);
 
-      if (typeof parsedValue === "function") {
-        parsedValue = parsedValue.bind(component);
-      }
+      return { name: componentName, props: parsedProps };
+    }
+  );
 
-      acc[name] = value;
-
-      return acc;
-    }, {} as Props);
-
-    acc[componentName] = parsedProps;
-
-    return acc;
-  }, {} as ParsedComponents);
-
-  return componentsWithProps;
+  return parsedComponents;
 };
 
 export const parseComponentsNames = (template: string): string[] => {
@@ -78,4 +68,32 @@ export const parsePropRawValue = (rawProp: string): string => {
   const [rawValue = ""] = rawProp.match(PROP_RAW_VALUE_REG_EXP) ?? [];
 
   return rawValue;
+};
+
+export const parsePropValue = <T>(
+  rawValue: string,
+  component: Component<T>
+): PropValue => {
+  let parsedValue: PropValue;
+
+  if (isRawPropValueObject(rawValue)) {
+    rawValue = "(" + rawValue + ")";
+  }
+
+  (function (this: Component<T>) {
+    parsedValue = eval(rawValue);
+
+    if (typeof parsedValue === "function") {
+      parsedValue = parsedValue.bind(this);
+    }
+  }.call(component));
+
+  return parsedValue;
+};
+
+export const isRawPropValueObject = (rawValue: string): boolean => {
+  const IS_OBJECT_REG_EXP = /^{(.*)}$/g;
+  const [obj = ""] = rawValue.match(IS_OBJECT_REG_EXP) ?? [];
+
+  return !!obj;
 };
