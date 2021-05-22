@@ -1,7 +1,7 @@
 import {
   isRawPropValueObject,
   normalizeProps,
-  parseChildrenComponentsFromComponent,
+  parseChildrenComponents,
   parseComponentPropsFromTemplate,
   parseComponentsNames,
   parsePropName,
@@ -163,9 +163,9 @@ describe("Components Parser", () => {
     });
   });
 
-  it("parseChildrenComponentsFromComponent", () => {
-    expect(
-      JSON.stringify(parseChildrenComponentsFromComponent(TEST_COMPONENT))
-    ).toBe(JSON.stringify([PARSED_COMPONENT]));
+  it("parseChildrenComponents", () => {
+    expect(JSON.stringify(parseChildrenComponents(TEST_COMPONENT))).toBe(
+      JSON.stringify([PARSED_COMPONENT])
+    );
   });
 });

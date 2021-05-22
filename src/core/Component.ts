@@ -4,6 +4,7 @@ import {
   ComponentClass,
 } from "@src/models/Component";
 import { DomListeners } from "./DomListeners";
+import { parseChildrenComponents } from "./utils/componentsParser";
 import { normalizeTemplate } from "./utils/normalizeTemplate";
 
 export abstract class Component<props>
@@ -65,48 +66,10 @@ export abstract class Component<props>
     return innterHtml;
   }
 
-  // parseComponentsFromTemplate
   private initComponents(): void {
-    // parseComponentsNames
+    const parsedComponents = parseChildrenComponents(this);
 
-    const COMPONENT_NAMES_REG_EXP = /(?<=\<)[A-Z]\w+/g;
-
-    const componentsNames = this.template.match(COMPONENT_NAMES_REG_EXP) ?? [];
-
-    const componentsWithProps = componentsNames.reduce((acc, componentName) => {
-      const COMPONENT_PROPS_REG_EXP = new RegExp(
-        `(?<=\\<${componentName}\\s?).*?(?=\\/>)`,
-        "g"
-      );
-
-      const [props = ""] = this.template.match(COMPONENT_PROPS_REG_EXP) ?? [];
-
-      const normalizedProps = props
-        .replace(/\s?:/g, ":")
-        .split(":")
-        .filter((p) => !!p);
-
-      //parseProps
-
-      const parsedProps = normalizedProps.reduce((acc, unparsedProp) => {
-        const [name = ""] = unparsedProp.match(/\w+(?=\=)/) ?? [];
-        const [value = ""] = unparsedProp.match(/(?<=\=).+/) ?? [];
-
-        let parsedValue = eval(value);
-
-        if (typeof parsedValue === "function") {
-          parsedValue = parsedValue.bind(this);
-        }
-
-        acc[name] = value;
-
-        return acc;
-      }, {} as { [key: string]: any });
-
-      acc[componentName] = parsedProps;
-
-      return acc;
-    }, {} as { [key: string]: any });
+    console.log(this.template);
   }
 
   init(): Component<props> {

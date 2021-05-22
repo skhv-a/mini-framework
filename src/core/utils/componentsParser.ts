@@ -1,7 +1,7 @@
 import { ParsedComponent, Props, PropValue } from "@src/models/Component";
 import { Component } from "@core/Component";
 
-export const parseChildrenComponentsFromComponent = <T>(
+export const parseChildrenComponents = <T>(
   component: Component<T>
 ): ParsedComponent[] => {
   const { template } = component;
