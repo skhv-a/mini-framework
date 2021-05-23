@@ -11,7 +11,7 @@ export abstract class DomListeners implements IDomListeners {
   }
 
   initDOMListeners(): void {
-    const $root = this.getRoot();
+    const $root = this.$root;
 
     this.events.forEach((event) => {
       if (!(this as any)[event]) {

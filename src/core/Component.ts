@@ -2,10 +2,12 @@ import {
   ComponentOptions,
   IComponent,
   ComponentClass,
+  ParsedComponent,
 } from "@src/models/Component";
 import { DomListeners } from "./DomListeners";
 import { parseChildrenComponents } from "./utils/componentsParser";
 import { normalizeTemplate } from "./utils/normalizeTemplate";
+import { replaceComponentsToHtmlMarkers } from "./utils/replaceComponentsToHtmlMarkers";
 
 export abstract class Component<props>
   extends DomListeners
@@ -15,8 +17,17 @@ export abstract class Component<props>
   template: string;
   props: props;
   components: { [name: string]: ComponentClass };
-  $root: Element | null;
   $parent: Element | null;
+  private parsedComponents: ParsedComponent[];
+  private _$root: Element | null;
+
+  get $root(): Element {
+    if (!this._$root) {
+      throw Error(`${this.name} $root is ${this._$root}`);
+    }
+
+    return this._$root;
+  }
 
   constructor({
     name,
@@ -29,8 +40,9 @@ export abstract class Component<props>
     this.name = name;
     this.props = props;
     this.components = components;
-    this.$root = null;
+    this._$root = null;
     this.$parent = null;
+    this.parsedComponents = [];
   }
 
   private getRootFromTemplate(): Element {
@@ -67,9 +79,33 @@ export abstract class Component<props>
   }
 
   private initComponents(): void {
-    const parsedComponents = parseChildrenComponents(this);
+    this.parsedComponents.forEach((parsedComponent) => {
+      const { name, props } = parsedComponent;
 
-    console.log(this.template);
+      const ComponentConstructor = this.components[name];
+      if (!ComponentConstructor)
+        throw Error(`${name} not found in ${this.name} "components"`);
+
+      const component = new ComponentConstructor(props);
+      const componentMarker = this.$root.querySelector(
+        `[data-component="${name}"]`
+      );
+
+      this.replaceComponentMarker(component, componentMarker);
+    });
+  }
+
+  private replaceComponentMarker(
+    component: Component<unknown>,
+    componentMarker: Element | null
+  ): void {
+    if (!componentMarker)
+      throw Error(`${component.name} component marker not found`);
+
+    component.init();
+
+    this.$root.insertBefore(component.$root, componentMarker);
+    this.$root.removeChild(componentMarker);
   }
 
   init(): Component<props> {
@@ -77,26 +113,16 @@ export abstract class Component<props>
     const htmlWithoutExtraSpaces = normalizeTemplate(html);
 
     this.template = htmlWithoutExtraSpaces;
-    this.$root = this.getRootFromTemplate();
+    this.parsedComponents = parseChildrenComponents(this);
+    this.template = replaceComponentsToHtmlMarkers(this.template);
+    this._$root = this.getRootFromTemplate();
+    this._$root.innerHTML = this.getInnerHtmlOfRootTemplate();
 
-    this.$root.innerHTML = this.getInnerHtmlOfRootTemplate();
     this.initComponents();
 
     super.initDOMListeners();
 
-    // this.initComponents();
-    // this.componentDidMount();
-
     return this;
-  }
-
-  getRoot(): Element {
-    if (!this.$root) {
-      // throw new Error('Run "init" method before "getRoot" method');
-      return document.createElement("div");
-    }
-
-    return this.$root;
   }
 
   componentDidMount(): void {
@@ -105,7 +131,6 @@ export abstract class Component<props>
 
   setState(newState) {
     this.state = { ...this.state, ...newState };
-    // this.init();
   }
 
   abstract render(): string;

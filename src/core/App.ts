@@ -15,10 +15,10 @@ export class App implements IApp {
 
   mount(): void {
     this.options.components.forEach((Component) => {
-      const component = new Component();
+      const component = new Component({});
       component.init(this.$root);
 
-      this.$root.append(component.getRoot());
+      this.$root.append(component.$root);
     });
   }
 

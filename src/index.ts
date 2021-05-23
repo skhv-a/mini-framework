@@ -1,7 +1,7 @@
 import { App } from "@core/App";
 import { Component } from "@core/Component";
 
-class TitleDescription extends Component<null> {
+class TitleDescription extends Component<undefined> {
   constructor() {
     super({
       name: "TitleDescription",
@@ -86,22 +86,15 @@ class Header extends Component<undefined> {
   }
 
   increment = () => {
+    console.log("click");
+
     this.setState({ counter: this.state.counter + 1 });
   };
 
   render() {
     return /* html */ `
         <div class="Header" style="height:100vh;display:flex;justify-content:center;align-items:center">
-        <Button 
-          :onClick=this.increment 
-          :name="alex"
-          :age=18
-          :a='sfdafs fsda'
-          :arr=["foo", "bar"]
-          :sayHi=() => {
-            console.log('Look at "this" magic ', this);
-          }
-        />
+        <Button :onClick=this.increment />
 
           ${this.state.counter} 
           ${
