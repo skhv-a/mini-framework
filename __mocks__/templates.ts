@@ -24,4 +24,6 @@ export const NORMALIZED_TEMPLATE = `<div><Button :onClick=() => {alert("clicked"
 
 export const TEMPLATE_WITH_COMPONENTS = `<div><ComponentA/><ComponentB/></div>`;
 
-export const TEMPLATE_WITH_COMPONENTS_MARKERS = `<div><div data-component="ComponentA"></div><div data-component="ComponentB"></div></div>`;
+export const TEMPLATE_WITH_COMPONENTS_MARKERS = /* html */ `<div><div data-component="ComponentA"></div><div data-component="ComponentB"></div></div>`;
+
+export const GET_ROOT_FROM_TEMPLATE_TEST_TEMPLATE = /* html */ `<div class="container" data-attr="test" id="#app"><h1>Title</h1><div class="child">some text</div></div>`;
