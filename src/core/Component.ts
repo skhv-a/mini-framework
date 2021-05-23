@@ -6,6 +6,7 @@ import {
 } from "@src/models/Component";
 import { DomListeners } from "./DomListeners";
 import { parseChildrenComponents } from "./utils/componentsParser";
+import { createRootFromTemplate } from "./utils/createRootFromTemplate";
 import { normalizeTemplate } from "./utils/normalizeTemplate";
 import { replaceComponentsToHtmlMarkers } from "./utils/replaceComponentsToHtmlMarkers";
 
@@ -45,39 +46,6 @@ export abstract class Component<props>
     this.parsedComponents = [];
   }
 
-  private getRootFromTemplate(): Element {
-    const ROOT_TAG_REG_EXP = /(?<=<)\w+/i;
-    const ROOT_ATTRS_REG_EXP = /(?<=\<\w+\s).*?(?=>)/g;
-
-    const [rootTag] = this.template.match(ROOT_TAG_REG_EXP) ?? [""];
-
-    if (!rootTag) {
-      throw new Error("Cannot get root tag from template");
-    }
-
-    const $root = document.createElement(rootTag);
-
-    const [unsplitedAttrs] = this.template.match(ROOT_ATTRS_REG_EXP) ?? [""];
-
-    const attrs = unsplitedAttrs.split(" ");
-
-    attrs.forEach((attrWithValue) => {
-      if (!attrWithValue) return;
-
-      const [attr, value] = attrWithValue.split("=");
-      $root.setAttribute(attr, value);
-    });
-
-    return $root;
-  }
-
-  private getInnerHtmlOfRootTemplate(): string {
-    const INNER_HTML_REG_EXP = /(?<=>).*(?=<\/\w+>)/g;
-    const [innterHtml] = this.template.match(INNER_HTML_REG_EXP) ?? [""];
-
-    return innterHtml;
-  }
-
   private initComponents(): void {
     this.parsedComponents.forEach((parsedComponent) => {
       const { name, props } = parsedComponent;
@@ -115,8 +83,7 @@ export abstract class Component<props>
     this.template = htmlWithoutExtraSpaces;
     this.parsedComponents = parseChildrenComponents(this);
     this.template = replaceComponentsToHtmlMarkers(this.template);
-    this._$root = this.getRootFromTemplate();
-    this._$root.innerHTML = this.getInnerHtmlOfRootTemplate();
+    this._$root = createRootFromTemplate(this.template);
 
     this.initComponents();
 
