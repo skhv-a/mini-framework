@@ -2,10 +2,9 @@ import {
   ComponentOptions,
   IComponent,
   ComponentClass,
-  ParsedComponent,
 } from "@src/models/Component";
+import { ChildrenComponents } from "./ChildrenComponents";
 import { DomListeners } from "./DomListeners";
-import { parseChildrenComponents } from "./utils/componentsParser";
 import { createRootFromTemplate } from "./utils/createRootFromTemplate";
 import { normalizeTemplate } from "./utils/normalizeTemplate";
 import { replaceComponentsToHtmlMarkers } from "./utils/replaceComponentsToHtmlMarkers";
@@ -15,20 +14,11 @@ export abstract class Component<props>
   implements IComponent
 {
   name: string;
-  template: string;
   props: props;
+  template: string;
   components: { [name: string]: ComponentClass };
   $parent: Element | null;
-  private parsedComponents: ParsedComponent[];
   private _$root: Element | null;
-
-  get $root(): Element {
-    if (!this._$root) {
-      throw Error(`${this.name} $root is ${this._$root}`);
-    }
-
-    return this._$root;
-  }
 
   constructor({
     name,
@@ -40,52 +30,30 @@ export abstract class Component<props>
 
     this.name = name;
     this.props = props;
+    this.template = "";
     this.components = components;
     this._$root = null;
     this.$parent = null;
-    this.parsedComponents = [];
   }
 
-  private initComponents(): void {
-    this.parsedComponents.forEach((parsedComponent) => {
-      const { name, props } = parsedComponent;
+  get $root(): Element {
+    if (!this._$root) {
+      throw Error(`${this.name} $root is ${this._$root}`);
+    }
 
-      const ComponentConstructor = this.components[name];
-      if (!ComponentConstructor)
-        throw Error(`${name} not found in ${this.name} "components"`);
-
-      const component = new ComponentConstructor(props);
-      const componentMarker = this.$root.querySelector(
-        `[data-component="${name}"]`
-      );
-
-      this.replaceComponentMarker(component, componentMarker);
-    });
-  }
-
-  private replaceComponentMarker(
-    component: Component<unknown>,
-    componentMarker: Element | null
-  ): void {
-    if (!componentMarker)
-      throw Error(`${component.name} component marker not found`);
-
-    component.init();
-
-    this.$root.insertBefore(component.$root, componentMarker);
-    this.$root.removeChild(componentMarker);
+    return this._$root;
   }
 
   init(): Component<props> {
-    const html = this.render();
-    const htmlWithoutExtraSpaces = normalizeTemplate(html);
+    const childrenComponents = new ChildrenComponents<props>(this);
 
-    this.template = htmlWithoutExtraSpaces;
-    this.parsedComponents = parseChildrenComponents(this);
-    this.template = replaceComponentsToHtmlMarkers(this.template);
-    this._$root = createRootFromTemplate(this.template);
+    const template = normalizeTemplate(this.render());
+    const templateWithMarkers = replaceComponentsToHtmlMarkers(template);
 
-    this.initComponents();
+    this.template = template;
+    this._$root = createRootFromTemplate(templateWithMarkers);
+
+    childrenComponents.parse().init().mount();
 
     super.initDOMListeners();
 

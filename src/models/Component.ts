@@ -5,8 +5,9 @@ import { DomListeners } from "@core/DomListeners";
 export interface IComponent extends DomListeners {
   name: string;
   props: any;
-  components: { [name: string]: ComponentClass };
   $root: Element | null;
+  template: string;
+  components: { [name: string]: ComponentClass };
   init(): Component<any>;
   componentDidMount(): void;
   render(): string;
