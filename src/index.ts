@@ -1,7 +1,7 @@
 import { App } from "@core/App";
 import { Component } from "@core/Component";
 
-class TitleDescription extends Component<undefined> {
+class TitleDescription extends Component {
   constructor() {
     super({
       name: "TitleDescription",
@@ -70,7 +70,11 @@ class Button extends Component<BtnProps> {
   }
 }
 
-class Header extends Component<undefined> {
+type HeaderState = {
+  counter: number;
+};
+
+class Header extends Component<undefined, HeaderState> {
   constructor() {
     super({
       name: "Header",

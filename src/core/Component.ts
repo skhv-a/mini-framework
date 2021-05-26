@@ -7,15 +7,21 @@ import { createRootFromTemplate } from "./utils/createRootFromTemplate";
 import { normalizeTemplate } from "./utils/normalizeTemplate";
 import { replaceComponentsToHtmlMarkers } from "./utils/replaceComponentsToHtmlMarkers";
 
-export abstract class Component<props> implements IComponent {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Obj = Record<string, any>;
+
+export abstract class Component<Props = Obj, State = Obj>
+  implements IComponent
+{
   private _$root: Element | null;
+  private _$parent: Element | null;
   private domListeners: IDomListeners;
   private childrenComponents: IChildrenComponents;
 
   name: string;
-  props: props;
+  props: Props;
+  state: State;
   template: string;
-  $parent: Element | null;
 
   constructor({
     name,
@@ -23,14 +29,16 @@ export abstract class Component<props> implements IComponent {
     components = {},
     events = [],
   }: ComponentOptions) {
+    this._$root = null;
+    this._$parent = null;
+
     this.name = name;
     this.props = props;
     this.template = "";
-    this._$root = null;
-    this.$parent = null;
+    this.state = {} as State;
 
     this.domListeners = new DomListeners(this, events);
-    this.childrenComponents = new ChildrenComponents<props>(this, components);
+    this.childrenComponents = new ChildrenComponents<Props>(this, components);
   }
 
   get $root(): Element {
@@ -41,7 +49,29 @@ export abstract class Component<props> implements IComponent {
     return this._$root;
   }
 
-  init(): Component<props> {
+  get $parent(): Element {
+    if (!this._$parent) {
+      throw Error(`${this.name} $parent is ${this._$parent}`);
+    }
+
+    return this._$parent;
+  }
+
+  private rerender(): void {
+    const $snapshot = this.$root;
+
+    this.init(this.$parent);
+    this.$parent.replaceChild(this.$root, $snapshot);
+  }
+
+  setState(newState: Record<string, unknown>): void {
+    this.state = { ...this.state, ...newState };
+    this.rerender();
+  }
+
+  init($parent: Element): Component<Props> {
+    this._$parent = $parent;
+
     const template = normalizeTemplate(this.render());
     const templateWithMarkers = replaceComponentsToHtmlMarkers(template);
 
@@ -57,10 +87,6 @@ export abstract class Component<props> implements IComponent {
 
   componentDidMount(): void {
     return;
-  }
-
-  setState(newState) {
-    this.state = { ...this.state, ...newState };
   }
 
   abstract render(): string;

@@ -6,7 +6,8 @@ export interface IComponent {
   props: any;
   $root: Element;
   template: string;
-  init(): Component<any>;
+  state: Record<string, any>;
+  init($parent: Element): Component<any>;
   componentDidMount(): void;
   render(): string;
 }
