@@ -4,6 +4,7 @@ import { IDomListeners } from "@src/models/DomListeners";
 import { ChildrenComponents } from "./ChildrenComponents";
 import { DomListeners } from "./DomListeners";
 import { createRootFromTemplate } from "./utils/createRootFromTemplate";
+import { isStateChanged } from "./utils/isStateChanged";
 import { normalizeTemplate } from "./utils/normalizeTemplate";
 import { replaceComponentsToHtmlMarkers } from "./utils/replaceComponentsToHtmlMarkers";
 
@@ -64,9 +65,11 @@ export abstract class Component<Props = Obj, State = Obj>
     this.$parent.replaceChild(this.$root, $snapshot);
   }
 
-  setState(newState: Record<string, unknown>): void {
-    this.state = { ...this.state, ...newState };
-    this.rerender();
+  setState(newState: State): void {
+    if (isStateChanged(this.state, newState)) {
+      this.state = { ...this.state, ...newState };
+      this.rerender();
+    }
   }
 
   init($parent: Element): Component<Props> {
