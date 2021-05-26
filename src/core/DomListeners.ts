@@ -5,24 +5,35 @@ import { Component } from "./Component";
 export class DomListeners implements IDomListeners {
   private events: string[];
   private $component: Component<any>;
+  private eventHandlers: Record<string, (e: Event) => void>;
 
   constructor($component: Component, events: string[]) {
     this.$component = $component;
     this.events = events;
+    this.eventHandlers = {};
   }
 
-  initDOMListeners(): void {
+  addDOMListeners(): void {
     this.events.forEach((event) => {
-      let eventHandler = this.$component[event as keyof Component];
+      let handler = this.$component[event as keyof Component];
 
-      if (!eventHandler) {
+      if (!handler) {
         throw new Error(
           `Method "${event}" does not implemented in "${this.$component.name}" component`
         );
       }
 
-      eventHandler = eventHandler.bind(this.$component);
-      this.$component.$root.addEventListener(event, eventHandler);
+      handler = handler.bind(this.$component);
+
+      this.eventHandlers[event] = handler;
+      this.$component.$root.addEventListener(event, handler);
+    });
+  }
+
+  removeDOMListeners(): void {
+    Object.keys(this.eventHandlers).forEach((event) => {
+      const handler = this.eventHandlers[event];
+      this.$component.$root.removeEventListener(event, handler);
     });
   }
 }

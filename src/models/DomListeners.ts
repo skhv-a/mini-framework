@@ -1,3 +1,4 @@
 export interface IDomListeners {
-  initDOMListeners(): void;
+  addDOMListeners(): void;
+  removeDOMListeners(): void;
 }

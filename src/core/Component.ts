@@ -80,12 +80,17 @@ export abstract class Component<Props = Obj, State = Obj>
 
     this.template = template;
     this._$root = createRootFromTemplate(templateWithMarkers);
-    this.domListeners.initDOMListeners();
+    this.domListeners.addDOMListeners();
     this.childrenComponents.parse().init().mount();
 
     this.componentDidMount();
 
     return this;
+  }
+
+  unmount(): void {
+    // this.domListeners.removeDOMListeners();
+    console.log(this.$parent.contains(this.$root));
   }
 
   componentDidMount(): void {
