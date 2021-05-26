@@ -30,7 +30,7 @@ export class ChildrenComponents<props> implements IChildrenComponents {
       if (!ComponentConstructor)
         throw Error(`${name} not found in ${this.parent.name} "components"`);
 
-      return new ComponentConstructor(props).init();
+      return new ComponentConstructor(props).init(this.parent.$root);
     });
 
     return this;

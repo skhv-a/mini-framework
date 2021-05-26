@@ -27,7 +27,11 @@ type TitleProps = {
   name: string;
 };
 
-class Title extends Component<TitleProps> {
+type TitleState = {
+  isDescriptionVisible: boolean;
+};
+
+class Title extends Component<TitleProps, TitleState> {
   constructor(props: TitleProps) {
     super({
       name: "Title",
@@ -35,19 +39,23 @@ class Title extends Component<TitleProps> {
       components: { TitleDescription },
       events: ["click"],
     });
+
+    this.state = {
+      isDescriptionVisible: true,
+    };
   }
 
-  click(e: MouseEvent) {
-    e.stopPropagation();
-    console.log("click from Title");
+  click() {
+    this.setState({ isDescriptionVisible: !this.state.isDescriptionVisible });
+    console.log(this.state);
   }
 
   render() {
     return /* html */ `
       <div class='Title'> 
-        <h1>Title</h1>
+        <h1>Title toggler</h1>
         ${this.props.name}&nbsp; 
-        <TitleDescription  />
+        ${this.state.isDescriptionVisible ? "<TitleDescription />" : "no title"}
       </div>
   `;
   }

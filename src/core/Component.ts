@@ -89,7 +89,7 @@ export abstract class Component<Props = Obj, State = Obj>
   }
 
   componentDidMount(): void {
-    return;
+    // do nothing
   }
 
   abstract render(): string;
