@@ -1,8 +1,7 @@
-import { App } from "./core/App";
-import { Component } from "./core/Component";
-import { templateComponent } from "./core/utils/templateComponent";
+import { App } from "@core/App";
+import { Component } from "@core/Component";
 
-class TitleDescription extends Component<null> {
+class TitleDescription extends Component<undefined> {
   constructor() {
     super({
       name: "TitleDescription",
@@ -17,7 +16,9 @@ class TitleDescription extends Component<null> {
 
   render() {
     return /* html */ `
-      <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</span>
+      <span>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+      </span>
     `;
   }
 }
@@ -43,43 +44,68 @@ class Title extends Component<TitleProps> {
 
   render() {
     return /* html */ `
-      <div> 
+      <div class='Title'> 
         <h1>Title</h1>
-        ${this.props.name}
-        ${templateComponent("TitleDescription")}
+        ${this.props.name}&nbsp; 
+        <TitleDescription  />
       </div>
   `;
   }
 }
 
-type HeaderProps = {
-  btnText: string;
-};
-
-class Header extends Component<HeaderProps> {
-  constructor(props: HeaderProps) {
-    super({
-      name: "Header",
-      props,
-      events: ["click"],
-      components: { Title },
-    });
+type BtnProps = { onClick: () => void };
+class Button extends Component<BtnProps> {
+  constructor(props: BtnProps) {
+    super({ name: "Button", events: ["click"], props });
   }
 
-  click(e: MouseEvent) {
-    console.log(e);
+  click() {
+    this.props.onClick();
   }
 
   render() {
     return /* html */ `
-      <div class='header' data-about="Elephants">
-        Header ${templateComponent("Title", { name: "alex" })}
-        <button>${this.props.btnText}</button>
-      </div>`;
+        <button style='margin-right:15px;'>Increment</button>
+    `;
   }
 }
 
+class Header extends Component<undefined> {
+  constructor() {
+    super({
+      name: "Header",
+      components: { Button, Title },
+    });
+    this.state = {
+      counter: 1,
+    };
+  }
+
+  increment = () => {
+    console.log("click");
+
+    this.setState({ counter: this.state.counter + 1 });
+  };
+
+  render() {
+    return /* html */ `
+        <div class="Header" style="height:100vh;display:flex;justify-content:center;align-items:center">
+        <Button :onClick=this.increment />
+
+          ${this.state.counter} 
+          ${
+            this.state.counter > 1
+              ? "Title disapeared"
+              : /* html */ `
+                  <Title :name="alex"/>
+                  click the button to toggle title
+                    `
+          }
+        </div>
+    `;
+  }
+}
 const app = new App("#root", {
-  components: [Header.bind(null, { btnText: "buttom" })],
+  components: [Header],
 });
 app.mount();

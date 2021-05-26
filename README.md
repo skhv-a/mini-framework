@@ -1,2 +1,9 @@
 # mini-framework
-Creating SPA without framework from scratch
+Declarative mini-framework for SPA without Virtual DOM from scratch.
+
+Technologies: 
+-TypeScript
+-Webpack
+-ESlint
+-Babel
+-Jest

@@ -1,12 +1,11 @@
-import { Component } from "../core/Component";
-import { DomListeners } from "../core/DomListeners";
+import { Component } from "@core/Component";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export interface IComponent extends DomListeners {
+export interface IComponent {
   name: string;
   props: any;
-  components: { [name: string]: ComponentClass };
-  $root: Element | null;
+  $root: Element;
+  template: string;
   init(): Component<any>;
   componentDidMount(): void;
   render(): string;
@@ -22,3 +21,20 @@ export type ComponentOptions = {
   props?: any;
   events?: string[];
 };
+
+export type PropValue =
+  | string
+  | number
+  | null
+  | boolean
+  | undefined
+  | Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  | Function
+  | PropValue[];
+
+export type Props = {
+  [propName: string]: PropValue;
+};
+
+export type ParsedComponent = { name: string; props: Props };

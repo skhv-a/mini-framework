@@ -1,17 +1,21 @@
-import {
-  ComponentOptions,
-  IComponent,
-  ComponentClass,
-} from "../models/Component";
+import { IChildrenComponents } from "@src/models/ChildrenComponents";
+import { ComponentOptions, IComponent } from "@src/models/Component";
+import { IDomListeners } from "@src/models/DomListeners";
+import { ChildrenComponents } from "./ChildrenComponents";
 import { DomListeners } from "./DomListeners";
+import { createRootFromTemplate } from "./utils/createRootFromTemplate";
+import { normalizeTemplate } from "./utils/normalizeTemplate";
+import { replaceComponentsToHtmlMarkers } from "./utils/replaceComponentsToHtmlMarkers";
 
-export abstract class Component<props>
-  extends DomListeners
-  implements IComponent {
+export abstract class Component<props> implements IComponent {
+  private _$root: Element | null;
+  private domListeners: IDomListeners;
+  private childrenComponents: IChildrenComponents;
+
   name: string;
   props: props;
-  components: { [name: string]: ComponentClass };
-  $root: Element | null;
+  template: string;
+  $parent: Element | null;
 
   constructor({
     name,
@@ -19,109 +23,44 @@ export abstract class Component<props>
     components = {},
     events = [],
   }: ComponentOptions) {
-    super(events);
-
     this.name = name;
     this.props = props;
-    this.components = components;
-    this.$root = null;
+    this.template = "";
+    this._$root = null;
+    this.$parent = null;
+
+    this.domListeners = new DomListeners(this, events);
+    this.childrenComponents = new ChildrenComponents<props>(this, components);
   }
 
-  private getRootFromTemplate(template: string): Element {
-    const openingTag = template.indexOf("<");
-    const closingTag = template.indexOf(">");
-    const tagWithAttrs = template.slice(openingTag + 1, closingTag);
-
-    const [tag, ...attrs] = tagWithAttrs.split(" ");
-
-    const $root = document.createElement(tag);
-
-    attrs.forEach((attr) => {
-      const [attrName, value] = attr.split("=");
-      const valueWithoutQuotes = value.slice(1, -1);
-
-      if ($root) {
-        $root.setAttribute(attrName, valueWithoutQuotes);
-      }
-    });
-
-    return $root;
-  }
-
-  private getInnerHtmlOfRootTemplate(template: string): string {
-    const innerHTMLStart = template.indexOf(">");
-    const innerHTMLEnd = template.lastIndexOf("<");
-
-    return template.slice(innerHTMLStart + 1, innerHTMLEnd);
-  }
-
-  private initComponents(): void {
-    if (!this.$root) {
-      throw new Error("$root does not exist");
+  get $root(): Element {
+    if (!this._$root) {
+      throw Error(`${this.name} $root is ${this._$root}`);
     }
 
-    if (!Object.keys(this.components).length) {
-      return;
-    }
-
-    this.$root
-      .querySelectorAll("[data-component]")
-      .forEach((templateComponent) => {
-        const componentName =
-          templateComponent.getAttribute("data-component") ?? "";
-        const componentProps =
-          templateComponent.getAttribute("data-props") ?? "";
-
-        const ComponentConstructor = this.components[componentName];
-        if (!ComponentConstructor) {
-          throw new Error(
-            `${componentName} constructor was not found in 'components' object`
-          );
-        }
-        const component = new ComponentConstructor(
-          JSON.parse(componentProps)
-        ).init();
-
-        const templateComponentParent = templateComponent.parentElement;
-
-        if (templateComponentParent && component.$root) {
-          templateComponentParent.replaceChild(
-            component.$root,
-            templateComponent
-          );
-        } else {
-          console.error(
-            `Something went wrong :(
-            templateComponentParent: ${templateComponentParent}; 
-            $root: ${component.$root};`
-          );
-        }
-      });
+    return this._$root;
   }
 
   init(): Component<props> {
-    const html = this.render();
+    const template = normalizeTemplate(this.render());
+    const templateWithMarkers = replaceComponentsToHtmlMarkers(template);
 
-    this.$root = this.getRootFromTemplate(html);
-    this.$root.innerHTML = this.getInnerHtmlOfRootTemplate(html);
+    this.template = template;
+    this._$root = createRootFromTemplate(templateWithMarkers);
+    this.domListeners.initDOMListeners();
+    this.childrenComponents.parse().init().mount();
 
     this.componentDidMount();
-    super.initDOMListeners();
-    this.initComponents();
 
     return this;
   }
 
-  getRoot(): Element {
-    if (!this.$root) {
-      throw new Error('Run "init" method before "getRoot" method');
-    }
-
-    return this.$root;
-  }
-
   componentDidMount(): void {
     return;
+  }
+
+  setState(newState) {
+    this.state = { ...this.state, ...newState };
   }
 
   abstract render(): string;

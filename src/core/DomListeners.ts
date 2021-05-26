@@ -1,28 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IDomListeners } from "../models/DomListeners";
+import { Component } from "./Component";
 
-export abstract class DomListeners implements IDomListeners {
-  events: string[];
-  abstract getRoot(): Element;
-  abstract name: string;
+export class DomListeners implements IDomListeners {
+  private events: string[];
+  private $component: Component<any>;
 
-  constructor(events: string[]) {
+  constructor($component: Component<any>, events: string[]) {
+    this.$component = $component;
     this.events = events;
   }
 
   initDOMListeners(): void {
-    const $root = this.getRoot();
-
     this.events.forEach((event) => {
-      if (!(this as any)[event]) {
+      let eventHandler = this.$component[event as keyof Component<any>];
+
+      if (!eventHandler) {
         throw new Error(
-          `Method "${event}" does not implemented in "${this.name}" component`
+          `Method "${event}" does not implemented in "${this.$component.name}" component`
         );
       }
 
-      (this as any)[event] = (this as any)[event].bind(this);
-
-      $root.addEventListener(event, (this as any)[event]);
+      eventHandler = eventHandler.bind(this.$component);
+      this.$component.$root.addEventListener(event, eventHandler);
     });
   }
 }
