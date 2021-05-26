@@ -1,17 +1,20 @@
 import { IChildrenComponents } from "@src/models/ChildrenComponents";
-import { ParsedComponent } from "@src/models/Component";
+import { ComponentClass, ParsedComponent } from "@src/models/Component";
 import { Component } from "./Component";
 import { parseChildrenComponents } from "./utils/componentsParser";
 
+type Components = Record<string, ComponentClass>;
 export class ChildrenComponents<props> implements IChildrenComponents {
   private parent: Component<unknown>;
   private parsedComponents: ParsedComponent[];
   private initiatedComponents: Component<unknown>[];
+  private components: Components;
 
-  constructor(parent: Component<props>) {
+  constructor(parent: Component<props>, components: Components) {
     this.parent = parent;
     this.parsedComponents = [];
     this.initiatedComponents = [];
+    this.components = components;
   }
 
   parse(): ChildrenComponents<props> {
@@ -23,7 +26,7 @@ export class ChildrenComponents<props> implements IChildrenComponents {
     this.initiatedComponents = this.parsedComponents.map((parsedComponent) => {
       const { name, props } = parsedComponent;
 
-      const ComponentConstructor = this.parent.components[name];
+      const ComponentConstructor = this.components[name];
       if (!ComponentConstructor)
         throw Error(`${name} not found in ${this.parent.name} "components"`);
 

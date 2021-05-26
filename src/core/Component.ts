@@ -1,24 +1,21 @@
-import {
-  ComponentOptions,
-  IComponent,
-  ComponentClass,
-} from "@src/models/Component";
+import { IChildrenComponents } from "@src/models/ChildrenComponents";
+import { ComponentOptions, IComponent } from "@src/models/Component";
+import { IDomListeners } from "@src/models/DomListeners";
 import { ChildrenComponents } from "./ChildrenComponents";
 import { DomListeners } from "./DomListeners";
 import { createRootFromTemplate } from "./utils/createRootFromTemplate";
 import { normalizeTemplate } from "./utils/normalizeTemplate";
 import { replaceComponentsToHtmlMarkers } from "./utils/replaceComponentsToHtmlMarkers";
 
-export abstract class Component<props>
-  extends DomListeners
-  implements IComponent
-{
+export abstract class Component<props> implements IComponent {
+  private _$root: Element | null;
+  private domListeners: IDomListeners;
+  private childrenComponents: IChildrenComponents;
+
   name: string;
   props: props;
   template: string;
-  components: { [name: string]: ComponentClass };
   $parent: Element | null;
-  private _$root: Element | null;
 
   constructor({
     name,
@@ -26,14 +23,14 @@ export abstract class Component<props>
     components = {},
     events = [],
   }: ComponentOptions) {
-    super(events);
-
     this.name = name;
     this.props = props;
     this.template = "";
-    this.components = components;
     this._$root = null;
     this.$parent = null;
+
+    this.domListeners = new DomListeners(this, events);
+    this.childrenComponents = new ChildrenComponents<props>(this, components);
   }
 
   get $root(): Element {
@@ -45,17 +42,15 @@ export abstract class Component<props>
   }
 
   init(): Component<props> {
-    const childrenComponents = new ChildrenComponents<props>(this);
-
     const template = normalizeTemplate(this.render());
     const templateWithMarkers = replaceComponentsToHtmlMarkers(template);
 
     this.template = template;
     this._$root = createRootFromTemplate(templateWithMarkers);
+    this.domListeners.initDOMListeners();
+    this.childrenComponents.parse().init().mount();
 
-    childrenComponents.parse().init().mount();
-
-    super.initDOMListeners();
+    this.componentDidMount();
 
     return this;
   }

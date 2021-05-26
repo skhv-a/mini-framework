@@ -1,13 +1,11 @@
 import { Component } from "@core/Component";
-import { DomListeners } from "@core/DomListeners";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export interface IComponent extends DomListeners {
+export interface IComponent {
   name: string;
   props: any;
-  $root: Element | null;
+  $root: Element;
   template: string;
-  components: { [name: string]: ComponentClass };
   init(): Component<any>;
   componentDidMount(): void;
   render(): string;

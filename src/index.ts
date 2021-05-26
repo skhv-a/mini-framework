@@ -46,7 +46,7 @@ class Title extends Component<TitleProps> {
     return /* html */ `
       <div class='Title'> 
         <h1>Title</h1>
-        ${this.props.name} 
+        ${this.props.name}&nbsp; 
         <TitleDescription  />
       </div>
   `;
@@ -56,11 +56,7 @@ class Title extends Component<TitleProps> {
 type BtnProps = { onClick: () => void };
 class Button extends Component<BtnProps> {
   constructor(props: BtnProps) {
-    super({
-      name: "Button",
-      events: ["click"],
-      props,
-    });
+    super({ name: "Button", events: ["click"], props });
   }
 
   click() {
