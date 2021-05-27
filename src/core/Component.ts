@@ -18,6 +18,7 @@ export abstract class Component<Props = Obj, State = Obj>
   private _$parent: Element | null;
   private domListeners: IDomListeners;
   private childrenComponents: IChildrenComponents;
+  private isMounted: boolean;
 
   name: string;
   props: Props;
@@ -36,6 +37,7 @@ export abstract class Component<Props = Obj, State = Obj>
     this.name = name;
     this.props = props;
     this.template = "";
+    this.isMounted = false;
     this.state = {} as State;
 
     this.domListeners = new DomListeners(this, events);
@@ -83,17 +85,26 @@ export abstract class Component<Props = Obj, State = Obj>
     this.domListeners.addDOMListeners();
     this.childrenComponents.parse().init().mount();
 
-    this.componentDidMount();
+    if (!this.isMounted) {
+      this.componentDidMount();
+      this.isMounted = true;
+    }
 
     return this;
   }
 
   unmount(): void {
-    // this.domListeners.removeDOMListeners();
-    console.log(this.$parent.contains(this.$root));
+    this.componentDidUnmount();
+    this.childrenComponents.unmount();
+    this.domListeners.removeDOMListeners();
+    this.$parent.removeChild(this.$root);
   }
 
   componentDidMount(): void {
+    // do nothing
+  }
+
+  componentDidUnmount(): void {
     // do nothing
   }
 

@@ -14,6 +14,14 @@ class TitleDescription extends Component {
     console.log("do not copy text :)");
   }
 
+  componentDidMount = () => {
+    console.log(this.name, "mounted");
+  };
+
+  componentDidUnmount = () => {
+    console.log(this.name, "unmounted");
+  };
+
   render() {
     return /* html */ `
       <span>
@@ -47,7 +55,6 @@ class Title extends Component<TitleProps, TitleState> {
 
   click() {
     this.setState({ isDescriptionVisible: !this.state.isDescriptionVisible });
-    console.log(this.state);
   }
 
   render() {
@@ -56,6 +63,7 @@ class Title extends Component<TitleProps, TitleState> {
         <h1>Title toggler</h1>
         ${this.props.name}&nbsp; 
         ${this.state.isDescriptionVisible ? "<TitleDescription />" : "no title"}
+        <TitleDescription />
       </div>
   `;
   }
