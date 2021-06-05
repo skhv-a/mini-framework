@@ -1,12 +1,8 @@
-import { ComponentClass } from "./Component";
-
-export interface AppOptions {
-  components: ComponentClass[];
-}
+import { IComponent } from "./Component";
 
 export interface IApp {
-  $root: Element | null;
-  options: AppOptions;
+  $rootNode: Element | null;
+  rootComponent: IComponent;
   mount(): void;
   unmount(): void;
 }
