@@ -1,28 +1,26 @@
-import { AppOptions, IApp } from "../models/App";
+import { ComponentClass } from "@src/models/Component";
+import { IApp } from "../models/App";
+import { Component } from "./Component";
 
 export class App implements IApp {
-  $root: Element;
-  options: AppOptions;
+  $rootNode: Element;
+  rootComponent: Component;
 
-  constructor(rootSelector: string, options: AppOptions) {
-    this.$root = document.querySelector(rootSelector) as Element;
-    this.options = options;
+  constructor(rootSelector: string, Component: ComponentClass) {
+    this.$rootNode = document.querySelector(rootSelector) as Element;
+    this.rootComponent = new Component({});
 
-    if (!this.$root) {
+    if (!this.$rootNode) {
       throw new Error(`"${rootSelector}" element not found`);
     }
   }
 
   mount(): void {
-    this.options.components.forEach((Component) => {
-      const component = new Component({});
-      component.init(this.$root);
-
-      this.$root.append(component.$root);
-    });
+    this.rootComponent.init(this.$rootNode);
+    this.$rootNode.append(this.rootComponent.$root);
   }
 
   unmount(): void {
-    console.log("unmounting");
+    this.rootComponent.unmount();
   }
 }
