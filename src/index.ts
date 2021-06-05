@@ -1,7 +1,7 @@
 import { App } from "@core/App";
 import { Component } from "@core/Component";
 
-class TitleDescription extends Component<undefined> {
+class TitleDescription extends Component {
   constructor() {
     super({
       name: "TitleDescription",
@@ -13,6 +13,14 @@ class TitleDescription extends Component<undefined> {
     e.stopPropagation();
     console.log("do not copy text :)");
   }
+
+  componentDidMount = () => {
+    console.log(this.name, "mounted");
+  };
+
+  componentDidUnmount = () => {
+    console.log(this.name, "unmounted");
+  };
 
   render() {
     return /* html */ `
@@ -27,7 +35,11 @@ type TitleProps = {
   name: string;
 };
 
-class Title extends Component<TitleProps> {
+type TitleState = {
+  isDescriptionVisible: boolean;
+};
+
+class Title extends Component<TitleProps, TitleState> {
   constructor(props: TitleProps) {
     super({
       name: "Title",
@@ -35,19 +47,23 @@ class Title extends Component<TitleProps> {
       components: { TitleDescription },
       events: ["click"],
     });
+
+    this.state = {
+      isDescriptionVisible: true,
+    };
   }
 
-  click(e: MouseEvent) {
-    e.stopPropagation();
-    console.log("click from Title");
+  click() {
+    this.setState({ isDescriptionVisible: !this.state.isDescriptionVisible });
   }
 
   render() {
     return /* html */ `
       <div class='Title'> 
-        <h1>Title</h1>
+        <h1>Title toggler</h1>
         ${this.props.name}&nbsp; 
-        <TitleDescription  />
+        ${this.state.isDescriptionVisible ? "<TitleDescription />" : "no title"}
+        <TitleDescription />
       </div>
   `;
   }
@@ -70,7 +86,11 @@ class Button extends Component<BtnProps> {
   }
 }
 
-class Header extends Component<undefined> {
+type HeaderState = {
+  counter: number;
+};
+
+class Header extends Component<undefined, HeaderState> {
   constructor() {
     super({
       name: "Header",

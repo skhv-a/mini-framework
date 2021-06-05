@@ -1,5 +1,6 @@
 import { Component } from "@src/core/Component";
 import { normalizeTemplate } from "@src/core/utils/normalizeTemplate";
+import { ParsedComponent, ParsedComponentWithKey } from "@src/models/Component";
 
 export class PROPS_PARSER_TEST_COMPONENT extends Component<undefined> {
   constructor() {
@@ -30,3 +31,18 @@ export class PROPS_PARSER_TEST_COMPONENT extends Component<undefined> {
       `;
   }
 }
+
+export const PARSED_COMPONENT: ParsedComponent = {
+  name: "Component",
+  props: {
+    foo: "bar",
+  },
+};
+
+export const PARSED_COMPONENT_WITH_KEY: ParsedComponentWithKey = {
+  name: "Component",
+  props: {
+    foo: "bar",
+  },
+  key: "Component",
+};

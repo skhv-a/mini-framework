@@ -6,8 +6,10 @@ export interface IComponent {
   props: any;
   $root: Element;
   template: string;
-  init(): Component<any>;
+  state: Record<string, any>;
+  init($parent: Element): Component<any>;
   componentDidMount(): void;
+  componentDidUnmount(): void;
   render(): string;
 }
 
@@ -38,3 +40,5 @@ export type Props = {
 };
 
 export type ParsedComponent = { name: string; props: Props };
+
+export type ParsedComponentWithKey = ParsedComponent & { key: string };

@@ -10,7 +10,8 @@
     "dev": "cross-env NODE_ENV=development webpack serve --open",
     "build": "cross-env NODE_ENV=production webpack --mode production",
     "lint": "eslint ./",
-    "test": "jest"
+    "test": "jest",
+    "coverage": "jest --coverage"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

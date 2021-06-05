@@ -5,4 +5,5 @@ export interface IChildrenComponents {
   parse(): ChildrenComponents<any>;
   init(): ChildrenComponents<any>;
   mount(): ChildrenComponents<any>;
+  unmount(): ChildrenComponents<any>;
 }
