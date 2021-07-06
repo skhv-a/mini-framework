@@ -39,7 +39,7 @@ export const getRootTagFromTemplate = (template: string): string => {
 };
 
 export const getRootRawAttrsFromTemplate = (template: string): string => {
-  const ROOT_ATTRS_REG_EXP = /(?<=\<\w+\s).*?(?=>)/g;
+  const ROOT_ATTRS_REG_EXP = /(?<=^\<\w+\s).*?(?=>)/g;
   const [unsplitedAttrs] = template.match(ROOT_ATTRS_REG_EXP) ?? [""];
 
   return unsplitedAttrs;
