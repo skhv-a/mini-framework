@@ -58,11 +58,10 @@ class Title extends Component<TitleProps, TitleState> {
       props,
       components: { TitleDescription },
       events: ["click"],
+      state: {
+        isDescriptionVisible: true,
+      },
     });
-
-    this.state = {
-      isDescriptionVisible: true,
-    };
   }
 
   click() {
@@ -84,7 +83,11 @@ class Title extends Component<TitleProps, TitleState> {
 type BtnProps = { onClick: () => void };
 class Button extends Component<BtnProps> {
   constructor(props: BtnProps) {
-    super({ name: "Button", events: ["click"], props });
+    super({
+      name: "Button",
+      events: ["click"],
+      props,
+    });
   }
 
   click() {
@@ -106,16 +109,14 @@ class Header extends Component<undefined, HeaderState> {
   constructor() {
     super({
       name: "Header",
-      components: { Button, Title, Empty },
+      components: { Button, Title },
+      state: {
+        counter: 1,
+      },
     });
-    this.state = {
-      counter: 1,
-    };
   }
 
   increment = () => {
-    console.log("click");
-
     this.setState({ counter: this.state.counter + 1 });
   };
 
@@ -123,7 +124,6 @@ class Header extends Component<undefined, HeaderState> {
     return /* html */ `
         <div class="Header" style="height:100vh;display:flex;justify-content:center;align-items:center">
         <Button :onClick=this.increment />
-        <Empty/>
           ${this.state.counter} 
           ${
             this.state.counter > 1

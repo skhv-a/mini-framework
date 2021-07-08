@@ -16,8 +16,7 @@ export class App implements IApp {
   }
 
   mount(): void {
-    this.rootComponent.init(this.$rootNode);
-    this.$rootNode.append(this.rootComponent.$root);
+    this.rootComponent.init().mountTo(this.$rootNode);
   }
 
   unmount(): void {

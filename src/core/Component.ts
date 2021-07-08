@@ -1,12 +1,10 @@
-import { IChildrenComponents } from "@src/models/ChildrenComponents";
-import { ComponentOptions, IComponent } from "@src/models/Component";
-import { IDomListeners } from "@src/models/DomListeners";
-import { ChildrenComponents } from "./ChildrenComponents";
-import { DomListeners } from "./DomListeners";
-import { createRootFromTemplate } from "./utils/createRootFromTemplate";
+import {
+  ComponentClass,
+  ComponentOptions,
+  IComponent,
+} from "@src/models/Component";
+import { ComponentComposite } from "./ComponentComposite";
 import { isStateChanged } from "./utils/isStateChanged";
-import { normalizeTemplate } from "./utils/normalizeTemplate";
-import { replaceComponentsToHtmlMarkers } from "./utils/replaceComponentsToHtmlMarkers";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Obj = Record<string, any>;
@@ -14,90 +12,63 @@ type Obj = Record<string, any>;
 export abstract class Component<Props = Obj, State = Obj>
   implements IComponent
 {
-  private _$root: Element | null;
-  private _$parent: Element | null;
-  private domListeners: IDomListeners;
-  private childrenComponents: IChildrenComponents;
-  private isMounted: boolean;
-
   name: string;
   props: Props;
   state: State;
-  template: string;
+  template = "";
+  events: string[];
+  components: Record<string, ComponentClass>;
+  composite: ComponentComposite;
 
   constructor({
     name,
     props = {},
     components = {},
     events = [],
+    state = {},
   }: ComponentOptions) {
-    this._$root = null;
-    this._$parent = null;
-
     this.name = name;
     this.props = props;
-    this.template = "";
-    this.isMounted = false;
-    this.state = {} as State;
+    this.events = events;
+    this.components = components;
+    this.state = state as State;
 
-    this.domListeners = new DomListeners(this, events);
-    this.childrenComponents = new ChildrenComponents<Props>(this, components);
+    this.composite = new ComponentComposite(this);
   }
 
   get $root(): Element {
-    if (!this._$root) {
-      throw Error(`${this.name} $root is ${this._$root}`);
-    }
-
-    return this._$root;
+    return this.composite.$root;
   }
 
   get $parent(): Element {
-    if (!this._$parent) {
-      throw Error(`${this.name} $parent is ${this._$parent}`);
-    }
-
-    return this._$parent;
+    return this.composite.$parent;
   }
 
-  private rerender(): void {
-    const $snapshot = this.$root;
-
-    this.init(this.$parent);
-    this.$parent.replaceChild(this.$root, $snapshot);
+  init(): Component {
+    this.composite.init();
+    return this;
   }
 
-  setState(newState: State): void {
-    if (isStateChanged(this.state, newState)) {
+  mountTo(container: Element | Component): Component {
+    this.composite.mountTo(container);
+    return this;
+  }
+
+  rerender(): Component {
+    this.composite.rerender();
+    return this;
+  }
+
+  setState(newState: Partial<State>): void {
+    if (isStateChanged(this.state, { ...this.state, ...newState })) {
       this.state = { ...this.state, ...newState };
       this.rerender();
     }
   }
 
-  init($parent: Element): Component<Props> {
-    this._$parent = $parent;
-
-    const template = normalizeTemplate(this.render());
-    const templateWithMarkers = replaceComponentsToHtmlMarkers(template);
-
-    this.template = template;
-    this._$root = createRootFromTemplate(templateWithMarkers);
-    this.domListeners.addDOMListeners();
-    this.childrenComponents.parse().init().mount();
-
-    if (!this.isMounted) {
-      this.componentDidMount();
-      this.isMounted = true;
-    }
-
+  unmount(): Component {
+    this.composite.unmount();
     return this;
-  }
-
-  unmount(): void {
-    this.componentDidUnmount();
-    this.childrenComponents.unmount();
-    this.domListeners.removeDOMListeners();
-    this.$parent.removeChild(this.$root);
   }
 
   componentDidMount(): void {

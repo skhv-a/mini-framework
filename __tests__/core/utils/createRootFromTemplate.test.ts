@@ -1,4 +1,3 @@
-import { CREATE_ROOT_FROM_TEMPLATE_TEST_TEMPLATE as TEST_TEMPLATE } from "@mocks/templates";
 import {
   createRootFromTemplate,
   createRootTagFromTemplate,
@@ -7,7 +6,13 @@ import {
   getRootTagFromTemplate,
   rawAttrsToArray,
 } from "@src/core/utils/createRootFromTemplate";
+import { normalizeTemplate } from "@src/core/utils/normalizeTemplate";
 
+const TEST_TEMPLATE = /* html */ normalizeTemplate(`
+  <div class="container" data-attr="test" id="#app">
+    <h1>Title</h1>
+    <div class="child">some text</div>
+  </div>`);
 const ROOT_TAG = "div";
 const RAW_ATTRS = `class="container" data-attr="test" id="#app"`;
 const ATTRS = [`class="container"`, `data-attr="test"`, `id="#app"`];
@@ -22,8 +27,20 @@ describe("createRootFromTemplate", () => {
     expect(getRootTagFromTemplate(TEST_TEMPLATE)).toBe(ROOT_TAG);
   });
 
-  it("getRootRawAttrsFromTemplate", () => {
-    expect(getRootRawAttrsFromTemplate(TEST_TEMPLATE)).toBe(RAW_ATTRS);
+  describe("getRootRawAttrsFromTemplate", () => {
+    it("root has attrs", () => {
+      expect(getRootRawAttrsFromTemplate(TEST_TEMPLATE)).toBe(RAW_ATTRS);
+    });
+
+    it("root has not attrs", () => {
+      const TEMPLATE = "<div></div>";
+      expect(getRootRawAttrsFromTemplate(TEMPLATE)).toBe("");
+    });
+
+    it("Children attrs does not parse", () => {
+      const TEMPLATE = "<div><span class='child'></span></div>";
+      expect(getRootRawAttrsFromTemplate(TEMPLATE)).toBe("");
+    });
   });
 
   it("rawAttrsToArray", () => {
