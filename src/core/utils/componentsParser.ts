@@ -7,10 +7,13 @@ export const parseChildrenComponents = <T>(
   const { template } = component;
 
   const componentsNames = parseComponentsNames(template);
+  const componentsNamesWithIdx = indexComponentsNames(componentsNames);
 
-  const parsedComponents: ParsedComponent[] = componentsNames.map(
-    (componentName) => {
-      const rawProps = parseComponentPropsFromTemplate(componentName, template);
+  const parsedComponents: ParsedComponent[] = componentsNamesWithIdx.map(
+    (nameWithIdx) => {
+      const [name, idx] = nameWithIdx.split("-");
+
+      const rawProps = parseComponentPropsFromTemplate(nameWithIdx, template);
       const normalizedRawProps = normalizeProps(rawProps);
 
       const parsedProps = normalizedRawProps.reduce((props, rawProp) => {
@@ -23,7 +26,7 @@ export const parseChildrenComponents = <T>(
         return props;
       }, {} as Props);
 
-      return { name: componentName, props: parsedProps };
+      return { name, key: name + idx, props: parsedProps };
     }
   );
 
@@ -37,17 +40,34 @@ export const parseComponentsNames = (template: string): string[] => {
   return componentsNames;
 };
 
+export const indexComponentsNames = (componentsNames: string[]): string[] => {
+  const uniqs: string[] = [];
+  const dupls: string[] = [];
+
+  componentsNames.forEach((name) => {
+    const isDuplicate = uniqs.includes(name);
+    isDuplicate ? dupls.push(name) : uniqs.push(name);
+  });
+
+  const duplsWithIdx = dupls.map((d, idx) => `${d}-${++idx}`);
+  const uniqsWithIdx = uniqs.map((u) => `${u}-0`);
+
+  return [...uniqsWithIdx, ...duplsWithIdx];
+};
+
 export const parseComponentPropsFromTemplate = (
-  componentName: string,
+  componentNameWithKey: string,
   template: string
 ): string => {
+  const [name, key] = componentNameWithKey.split("-");
+
   const COMPONENT_PROPS_REG_EXP = new RegExp(
-    `(?<=\\<${componentName}\\s?).*?(?=\\/>)`,
+    `(?<=\\<${name}\\s?).*?(?=\\/>)`,
     "g"
   );
-  const [props = ""] = template.match(COMPONENT_PROPS_REG_EXP) ?? [];
+  const props = template.match(COMPONENT_PROPS_REG_EXP) ?? [""];
 
-  return props;
+  return props[Number(key)];
 };
 
 export const normalizeProps = (rawProps: string): string[] =>

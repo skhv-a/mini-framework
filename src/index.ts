@@ -1,93 +1,11 @@
 import { App } from "@core/App";
 import { Component } from "@core/Component";
 
-class Empty extends Component {
-  constructor() {
-    super({
-      name: "Empty",
-    });
-  }
+type ButtonProps = { onClick: () => void; content: string };
 
-  render() {
-    return "<div>empty</div>";
-  }
-}
-
-class TitleDescription extends Component {
-  constructor() {
-    super({
-      name: "TitleDescription",
-      events: ["mouseup"],
-    });
-  }
-
-  mouseup(e: MouseEvent) {
-    e.stopPropagation();
-    console.log("do not copy text :)");
-  }
-
-  componentDidMount = () => {
-    console.log(this.name, "mounted");
-  };
-
-  componentDidUnmount = () => {
-    console.log(this.name, "unmounted");
-  };
-
-  render() {
-    return /* html */ `
-      <span>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </span>
-    `;
-  }
-}
-
-type TitleProps = {
-  name: string;
-};
-
-type TitleState = {
-  isDescriptionVisible: boolean;
-};
-
-class Title extends Component<TitleProps, TitleState> {
-  constructor(props: TitleProps) {
-    super({
-      name: "Title",
-      props,
-      components: { TitleDescription },
-      events: ["click"],
-      state: {
-        isDescriptionVisible: true,
-      },
-    });
-  }
-
-  click() {
-    this.setState({ isDescriptionVisible: !this.state.isDescriptionVisible });
-  }
-
-  render() {
-    return /* html */ `
-      <div class='Title'> 
-        <h1>Title toggler</h1>
-        ${this.props.name}&nbsp; 
-        ${this.state.isDescriptionVisible ? "<TitleDescription />" : "no title"}
-        <TitleDescription />
-      </div>
-  `;
-  }
-}
-
-type BtnProps = { onClick: () => void };
-class Button extends Component<BtnProps> {
-  constructor(props: BtnProps) {
-    super({
-      name: "Button",
-      events: ["click"],
-      props,
-    });
+class Button extends Component<ButtonProps> {
+  constructor(props: ButtonProps) {
+    super({ name: "Button", props, events: ["click"] });
   }
 
   click() {
@@ -95,47 +13,76 @@ class Button extends Component<BtnProps> {
   }
 
   render() {
-    return /* html */ `
-        <button style='margin-right:15px;'>Increment</button>
-    `;
+    return /* html */ `<button>${this.props.content}</button>`;
   }
 }
 
-type HeaderState = {
-  counter: number;
-};
-
-class Header extends Component<undefined, HeaderState> {
+class Toggler extends Component<undefined, { isVisible: boolean }> {
   constructor() {
     super({
-      name: "Header",
-      components: { Button, Title },
+      name: "Toggler",
+      components: { Button },
       state: {
-        counter: 1,
+        isVisible: true,
       },
     });
   }
 
-  increment = () => {
-    this.setState({ counter: this.state.counter + 1 });
+  toggle = () => {
+    this.setState({ isVisible: !this.state.isVisible });
   };
 
   render() {
     return /* html */ `
-        <div class="Header" style="height:100vh;display:flex;justify-content:center;align-items:center">
-        <Button :onClick=this.increment />
-          ${this.state.counter} 
-          ${
-            this.state.counter > 1
-              ? "Title disapeared"
-              : /* html */ `
-                  <Title :name="alex"/>
-                  click the button to toggle title
-                    `
-          }
-        </div>
-    `;
+      <div>
+        <div>${this.state.isVisible ? "Visible" : "Hidden"}</div>
+        <Button :content="toggle" :onClick=this.toggle/>
+      </div>`;
   }
 }
 
-new App("#root", Header).mount();
+class Counter extends Component<undefined, { count: number }> {
+  constructor() {
+    super({ name: "Counter", components: { Button }, state: { count: 0 } });
+  }
+
+  decrement = () => {
+    this.setState({ count: this.state.count - 1 });
+  };
+
+  increment = () => {
+    this.setState({ count: this.state.count + 1 });
+  };
+
+  render() {
+    return /* html */ `
+      <div>
+        <Button :content="-" :onClick=this.decrement/>
+        &nbsp;${this.state.count}&nbsp;
+        <Button :content="+" :onClick=this.increment/>
+      </div>`;
+  }
+}
+
+class Container extends Component {
+  constructor() {
+    super({
+      name: "Container",
+      components: { Counter, Toggler },
+    });
+  }
+
+  render() {
+    return /* html */ `
+      <div style=text-align:center;>
+        <h1>Declarative mini-framework for SPA without Virtual DOM from scratch.</h1>
+        <p>Technologies TypeScript, Webpack, ESlint, Babel, Jest</p>
+        <p>Examples:</p>
+        <Counter/>
+        <hr/>
+        <Toggler/>
+      </div>`;
+  }
+}
+
+new App("#root", Container).mount();

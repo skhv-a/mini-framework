@@ -1,19 +1,16 @@
 import { Component } from "./Component";
 import { IChildrenComponentsParser } from "@src/models/ChildrenComponentsParser";
-import { ParsedComponent, ParsedComponentWithKey } from "@src/models/Component";
+import { ParsedComponent } from "@src/models/Component";
 import { parseChildrenComponents } from "./utils/componentsParser";
-import { getParsedComponentsWithKeys } from "./utils/getParsedComponentsWithKeys";
 
 export class ChildrenComponentsParser implements IChildrenComponentsParser {
   private cachedComponents: Record<string, Component> = {};
-  private parsedComponents: ParsedComponentWithKey[] = [];
+  private parsedComponents: ParsedComponent[] = [];
 
   constructor(private component: Component) {}
 
   private parse(): ChildrenComponentsParser {
-    const parsedComps = parseChildrenComponents(this.component);
-    this.parsedComponents = getParsedComponentsWithKeys(parsedComps);
-
+    this.parsedComponents = parseChildrenComponents(this.component);
     return this;
   }
 
@@ -40,16 +37,16 @@ export class ChildrenComponentsParser implements IChildrenComponentsParser {
     });
   }
 
-  private getCachedComponent(
-    parsedComponent: ParsedComponentWithKey
-  ): Component {
-    const { key } = parsedComponent;
+  private getCachedComponent(parsedComponent: ParsedComponent): Component {
+    const { key, props } = parsedComponent;
     let component = this.cachedComponents[key];
 
     if (!component) {
       component = this.createComponent(parsedComponent);
       this.cachedComponents[key] = component;
     }
+
+    component.props = props; // to update dynamic props
 
     return component;
   }

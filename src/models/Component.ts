@@ -41,6 +41,4 @@ export type Props = {
   [propName: string]: PropValue;
 };
 
-export type ParsedComponent = { name: string; props: Props };
-
-export type ParsedComponentWithKey = ParsedComponent & { key: string };
+export type ParsedComponent = { name: string; key: string; props: Props };
