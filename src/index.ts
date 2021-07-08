@@ -1,6 +1,18 @@
 import { App } from "@core/App";
 import { Component } from "@core/Component";
 
+class Empty extends Component {
+  constructor() {
+    super({
+      name: "Empty",
+    });
+  }
+
+  render() {
+    return "<div>empty</div>";
+  }
+}
+
 class TitleDescription extends Component {
   constructor() {
     super({
@@ -125,7 +137,5 @@ class Header extends Component<undefined, HeaderState> {
     `;
   }
 }
-const app = new App("#root", {
-  components: [Header],
-});
-app.mount();
+
+new App("#root", Header).mount();
