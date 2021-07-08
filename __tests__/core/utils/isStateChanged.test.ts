@@ -1,6 +1,6 @@
-import { STATE } from "@mocks/states";
 import { isStateChanged } from "@src/core/utils/isStateChanged";
 
+const STATE = { foo: "baz" };
 const UPDATED_STATE = { foo: "bar" };
 
 describe("isStateChanged", () => {

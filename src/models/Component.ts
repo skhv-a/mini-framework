@@ -1,13 +1,14 @@
 import { Component } from "@core/Component";
+import { ILifecycle } from "./ComponentLifecycle";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export interface IComponent {
+export interface IComponent extends ILifecycle {
   name: string;
   props: any;
-  $root: Element;
   template: string;
   state: Record<string, any>;
-  init($parent: Element): Component<any>;
+  components: { [name: string]: ComponentClass };
+  events: string[];
   componentDidMount(): void;
   componentDidUnmount(): void;
   render(): string;
@@ -22,6 +23,7 @@ export type ComponentOptions = {
   components?: { [name: string]: ComponentClass };
   props?: any;
   events?: string[];
+  state?: Record<string, any>;
 };
 
 export type PropValue =
