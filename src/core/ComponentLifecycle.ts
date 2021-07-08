@@ -39,7 +39,7 @@ export class ComponentLifecycle implements ILifecycle {
     const templateWithMarkers = replaceComponentsToHtmlMarkers(template);
 
     this.component.template = template;
-    this._$root = createRootFromTemplate(templateWithMarkers || "<div></div>");
+    this._$root = createRootFromTemplate(templateWithMarkers);
   }
 
   init(): ILifecycle {
