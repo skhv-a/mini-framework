@@ -2,6 +2,7 @@ import {
   isRawPropValueObject,
   normalizeProps,
   parseChildrenComponents,
+  indexComponentsNames,
   parseComponentPropsFromTemplate,
   parseComponentsNames,
   parsePropName,
@@ -14,6 +15,7 @@ import { ParsedComponent } from "@src/models/Component";
 const TEST_COMPONENT = new PROPS_PARSER_TEST_COMPONENT();
 
 const TEST_COMPONENT_CHILD_NAME = "ComponentForTest";
+const TEST_COMPONENT_CHILD_NAME_WITH_IDX = "ComponentForTest-0";
 
 const RAW_PROPS =
   ' :string="hello!" :number=28 :boolean=true :null=null :undefined=undefined :object={name: "Alex"} :array=["foo", "bar"] :function=() => {alert("hi!");} :onClick=this.clickHandler ';
@@ -62,6 +64,7 @@ const UNPARSED_PROPS = {
 
 const PARSED_COMPONENT: ParsedComponent = {
   name: TEST_COMPONENT_CHILD_NAME,
+  key: TEST_COMPONENT_CHILD_NAME + "0",
   props: PARSED_PROPS,
 };
 
@@ -75,7 +78,7 @@ describe("Components Parser", () => {
   it("parseComponentPropsFromTemplate", () => {
     expect(
       parseComponentPropsFromTemplate(
-        TEST_COMPONENT_CHILD_NAME,
+        TEST_COMPONENT_CHILD_NAME_WITH_IDX,
         TEST_COMPONENT.template
       )
     ).toBe(RAW_PROPS);
@@ -91,6 +94,18 @@ describe("Components Parser", () => {
 
   it("parsePropRawValue", () => {
     expect(parsePropRawValue(RAW_PROP)).toBe(RAW_PROP_VALUE);
+  });
+
+  describe("indexComponentsNames", () => {
+    it("1 component", () => {
+      expect(indexComponentsNames(["Component"])).toEqual(["Component-0"]);
+    });
+    it("2 components", () => {
+      expect(indexComponentsNames(["Component", "Component"])).toEqual([
+        "Component-0",
+        "Component-1",
+      ]);
+    });
   });
 
   describe("parsePropValue", () => {
