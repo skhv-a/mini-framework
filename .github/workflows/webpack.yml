@@ -1,0 +1,14 @@
+name: Manual Wait Workflow
+
+on:
+  workflow_dispatch: # запуск вручную через Web-интерфейс Github
+
+jobs:
+  wait_and_echo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for 5000 seconds
+        run: sleep 5000
+
+      - name: Print Done
+        run: echo "done"
